@@ -8,6 +8,7 @@
         @import "http://ajax.googleapis.com/ajax/libs/dojo/1.5/dijit/themes/claro/claro.css";
         @import "http://ajax.googleapis.com/ajax/libs/dojo/1.5/dojox/grid/resources/Grid.css";
         @import "http://ajax.googleapis.com/ajax/libs/dojo/1.5/dojox/grid/resources/claroGrid.css";
+        @import "ProfileEditor.css";
         
         html, body, .dijitBorderContainer {
             width:100%;
@@ -21,7 +22,7 @@
             isDebug: false,
             parseOnLoad: true,
             baseUrl: './',
-            modulePaths: {  }
+            modulePaths: { 'editor' : '.' }
         };
     </script>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/dojo/1.5/dojo/dojo.xd.js"></script>
@@ -34,17 +35,17 @@
     <body class="claro">
         <div dojoType="dijit.layout.BorderContainer" liveSplitters="true">
             <div dojoType="dijit.layout.ContentPane" region="top" splitter="false">
-                <span class="title">Editor Index</span>
+                <span class="title">Index</span>
                 <!--<span class='nav_back'><img src='images/nav_back.png'/ >
                 <a href='index.html'>Back to Editor Index</a></span>-->
             </div>
             <div dojoType="dijit.layout.ContentPane" region="center" splitter="false">
                 <h1>
-                <a href="profileEditorFrame.html">Profile Editor</a>
+                <a href="game/index.html">Game</a>
                 </h1>
                 
                 <h1>
-                <a href="gameEditorFrame.html">Game Editor</a>
+                <a href="editor/index.html">Editor</a>
                 </h1>
             </div>
     </body>

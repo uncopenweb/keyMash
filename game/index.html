@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    <meta charset="utf-8" />
+    <title>KeyMash!</title>
+    <style type="text/css">
+        @import "http://ajax.googleapis.com/ajax/libs/dojo/1.6/dojo/resources/dojo.css";
+        @import "http://ajax.googleapis.com/ajax/libs/dojo/1.6/dijit/themes/claro/claro.css";
+        @import "http://ajax.googleapis.com/ajax/libs/dojo/1.6/dojox/grid/resources/Grid.css";
+        @import "http://ajax.googleapis.com/ajax/libs/dojo/1.6/dojox/grid/resources/claroGrid.css";
+        
+        @import "KeyMash.css";
+        
+        html, body, .dijitBorderContainer {
+            width:100%;
+            height:100%;
+            overflow:hidden;
+        }
+        
+        #activity {
+            height:100%;
+            width:100%;
+            margin-left:auto;
+            margin-right:auto;
+            text-align:center;
+        }
+        
+        .keyblock {
+            display:inline-block;
+            width:50px;
+            height:50px;
+            border:2px outset #CCCCCC;
+            vertical-align:middle;
+        }
+        
+        .pressed {
+            background:#3BB9FF;
+        }
+        
+    </style>
+    <script type="text/javascript">
+        var djConfig = {
+            isDebug: false,
+            parseOnLoad: true,
+            baseUrl: './',
+            modulePaths: { 'game' : '.' }
+        };
+    </script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/dojo/1.6/dojo/dojo.xd.js"></script>
+    <script type="text/javascript" src="/libs/uow.js"></script>
+    <script type="text/javascript">
+        dojo.require('dijit.layout.BorderContainer');
+        dojo.require('dijit.layout.ContentPane');
+        dojo.require('game.KeyMash');
+        
+        uow.ui.connectKeys();
+    </script>
+    </head>
+    <body class="claro">
+        <div dojoType="dijit.layout.BorderContainer" liveSplitters="true">
+            <div dojoType="dijit.layout.ContentPane" region="top" splitter="false">
+                <span class="title">KeyMash!</span>
+                <!--<span class='nav_back'><img src='images/nav_back.png'/ >
+                <a href='index.html'>Back to Editor Index</a></span>-->
+            </div>
+            <div dojoType="dijit.layout.ContentPane" region="center" splitter="false">
+                <div id="activity" dojoType="game.KeyMash"></div>
+            </div>
+    </body>
+
+</html>
