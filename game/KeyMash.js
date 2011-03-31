@@ -16,30 +16,13 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
     keyUpHandle: {},
     
     game: {},
-    
-    available_keys: ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
-    
-    key_list: [ {keyName:'A', soundURL:'../sounds/A2'},
-                {keyName:'S', soundURL:'../sounds/B2'},
-                {keyName:'D', soundURL:'../sounds/C3'},
-                {keyName:'F', soundURL:'../sounds/D3'}
-                ],
-    key_to_sound: { 'A':'../sounds/A2',
-                    'S':'../sounds/B2',
-                    'D':'../sounds/C3',
-                    'F':'../sounds/D3'
-                },
-    
-    segments: [ ['A', 'S', 'D', 'S', 'A'],
-                 ['A', 'D', 'S', 'A'],
-                 ['F', 'D', 'F', 'D', 'S', 'A']
-            ],
+
     segNum: 0,
     segIndex: 0,
+    currentSegment: null,
     
-    key_sequence: ['A', 'S', 'D', 'S', 'A'],
-    sound_sequence: ['../sounds/A2', '../sounds/B2', '../sounds/C3', '../sounds/B2', '../sounds/A2'],
-    
+    keysOn: false,
+    practice: false,
     listeningForSegment: false,
     
     postCreate: function() {
@@ -51,7 +34,6 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
             handleAs:"json",
             load: dojo.hitch(this, function(data) {
                 this.game = data;
-                console.log(this.game);
             }),
             error: function(err) {
                 console.log(err);
@@ -60,36 +42,37 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
             this.audio = a;
             this.soundEnabled = true;
             this.playDeferredSounds();
+            
+            //do rest of startup
+            for(prop in this.game.keys) {
+                console.log(prop, this.game.keys[prop]);
+            }
+            
+            //register key events
+            dojo.subscribe('/uow/key/down/initial', dojo.hitch(this, this.handleKeyDown));
+            
+            //this.connect(null, 'onkeydown', this.handleKeyDown);
+            this.connect(null, 'onkeyup', this.handleKeyUp);
+            
+            this.setupKeys();
+            
+            this.startGame();
             console.log("all done");
         }))));
-        
-        for(prop in this.key_to_sound) {
-            console.log(prop, this.key_to_sound[prop]);
-        }
-        
-        //register key events
-        dojo.subscribe('/uow/key/down/initial', this.handleKeyDown);
-        
-        this.connect(null, 'onkeydown', this.handleKeyDown);
-        this.connect(null, 'onkeyup', this.handleKeyUp);
-        
-        this.setupKeys();
-        
-        this.startGame();
     
     },
     
     setupKeys: function() {
         
-        for(var i = 0; i < this.key_list.length; i++) {
+        for(key in this.game.keys) {
             
-            var key = dojo.create('span', {
-                id:this.available_keys[i], 
-                innerHTML:this.key_list[i].keyName
+            var keyblock = dojo.create('span', {
+                id:key, 
+                innerHTML:key
             });
-            dojo.addClass(key, 'keyblock');
+            dojo.addClass(keyblock, 'keyblock');
             
-            dojo.place(key, this.at_keys);
+            dojo.place(keyblock, this.at_keys);
             
         }
         
@@ -97,25 +80,50 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
     
     startGame: function() {
 
+        //you can now start messing with the keys
+        this.keysOn = true;
+        
+        //display the standard start messages
         this.at_messages.innerHTML = "Practice by pressing the keys to hear the sounds they make. <br> Press the space bar to continue...";
         this.sayText("Practice by pressing the keys to hear the sounds they make, then press the space bar when you are ready to continue");
         
-        this.practice = true;
-        
-        
-        
+        //listen once
+        var handle = dojo.connect(this, 'spaceKey', this, function() {
+            this.nextSegment();
+            dojo.disconnect(handle);
+        });
     },
     
     nextSegment: function() {
+    
         console.log("next segment");
+        this.currentSegment = this.game.segments[this.segNum];
+        
+        if(this.currentSegment.type == "keyBlock") {
+            this.at_messages.innerHTML = "Listen to the sequence of sounds, then try to repeat them!";
+            this.sayText("Listen to the sequence of sounds, then try to repeat them.").callAfter(
+                dojo.hitch(this, function() {
+                
+                    this.keysOn = false;
+                    setTimeout(dojo.hitch(this, this.playSegment), 750);
+                    
+                })
+            );
+        } 
+        else if(this.currentSegment.type == "audioBlock") {
+            
+            this.keysOn = false;
+            this.playSound(this.currentSegment.url).callAfter(
+                dojo.hitch(this, function() {
+                
+                    this.keysOn = false;
+                    setTimeout(dojo.hitch(this, this.nextSegment), 0);
+                })
+            );
+            
+        }
+        
         this.segNum++;
-        
-        this.listeningForSegment = false;
-        
-//        this.at_messages.innerHTML = "Listen to the sequence of sounds, then try to replicate them";
-//        this.sayText("Listen to the sequence of sounds, then press the space bar when you are ready to replicate them");
-        
-        //eventually do some segment setup
     
     },
     
@@ -123,12 +131,13 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
         console.log("listen segment");
         this.segIndex = 0;
         this.listeningForSegment = true;
+        this.keysOn = true;
         
         this.at_messages.innerHTML = "Try to replicate the segment!";
         this.sayText("Try to replicate the segment by pressing the keys to make sounds!");
     },
     
-    startSegment: function() {
+    playSegment: function() {
         
         var highlight = dojo.hitch(this, function(key) {
             this.colorKey(key);
@@ -149,20 +158,21 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
             
             var time = args.time;
             var list = args.list;
-            var sounds = args.sounds;
             var index = args.index;
-            var key_to_sound = this.key_to_sound;
-            console.log(time, list, sounds, index);
+            var key_to_sound = this.game.keys;
+            console.log(time, list, index);
             
-            setTimeout(function() {
-                highlight(list[index]);
-                play(key_to_sound[list[index]]);
-                d.callback({time:500, 'list':list, 'sounds':sounds, 'index':++index});
-            }, time);   
-            //return d;
+            highlight(list[index]);
+            this.playSound(key_to_sound[list[index]]).callAfter(dojo.hitch(this, function() {
             
-            if(index + 1 < list.length) {
-                console.log("now?");
+                setTimeout(dojo.hitch(this, function() {
+                    d.callback({time:time, list:list, index:++index});
+                }), time);
+            
+            }));
+            
+            if(index < list.length - 1) {
+                console.log("play next sound");
                 dojo.when(d, playNextSound);
             } else {
                 //listening(true);
@@ -172,68 +182,26 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
             }
         });
 
-        console.log(this.key_sequence, this.sound_sequence);
-        playNextSound({time:0, 'list':this.segments[this.segNum], 'sounds':this.sound_sequence, index:0});
-        
-//        playNextSound(0, 'a_key').then(function() {
-//            return playNextSound(1000, 's_key');
-//        }).then(function() {
-//            return playNextSound(1000, 'd_key');
-//        }).then(function() {
-//            return playNextSound(1000, 's_key');
-//        });
-        
-        
-//        playNextNote(1000).then(function() { 
-//            highlight('a_key');
-//            return defer(1000);
-//        }).then(function() {
-//            highlight('s_key');
-//        })
-     
-//        highlight('a_key');
-//        setTimeout(function() { highlight('s_key') }, 1000);
-//        setTimeout(function() { highlight('d_key') }, 2000);
-//        setTimeout(dojo.hitch(this, function() { 
-//            this.receiveKeyInput(true);
-//            this.at_messages.innerHTML = "Copy the sequence!";
-//        }), 3000);
-        
-        //oooor
-        
-//        var d = new dojo.Deferred();
-//        
-//        function callDef(time) {
-//            d = new Deferred();
-//            setTimeout(function() {
-//                d.callback();
-//            }, time);
-//            return d;
-//        }
-//        
-//        callDef(100).then(function() {
-//            //do something
-//            return callDef(121);
-//        });//.then....
+        console.log("PLAY SEGMENT!");
+        playNextSound({time:this.currentSegment.pause, 'list':this.currentSegment.segment, index:0});
+    
         
     },
     
     processSegment: function(key) {
     
-        console.log("Seg index",this.segIndex);
-    
         if(this.listeningForSegment) {
         
             console.log(key, " processed!");
-            if(key == this.segments[this.segNum][this.segIndex]) {
+            if(key == this.currentSegment.segment[this.segIndex]) {
                 console.log("CORRECT!");
                 this.segIndex += 1;
                 
-                if(this.segIndex == this.segments[this.segNum].length) {
+                if(this.segIndex == this.currentSegment.segment.length) {
                     console.log("Segment completed!!!!!!");
-                    setTimeout(dojo.hitch(this, function() { this.playSound("../sounds/win"); }), 500);
-                    setTimeout(dojo.hitch(this, function() { this.sayText("Press the space bar to hear the next section"); }), 1000);
-                    this.nextSegment();
+                    //setTimeout(dojo.hitch(this, function() { this.playSound("../sounds/win"); }), 500);
+                    //setTimeout(dojo.hitch(this, function() { this.sayText("Press the space bar to hear the next section"); }), 1000);
+                    setTimeout(dojo.hitch(this, function() { this.nextSegment(); }), 1000);
                 }
                 
             } else {
@@ -250,44 +218,55 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
     handleKeyDown: function(evt) {
     
         if(evt.keyCode == dojo.keys.SPACE) {
-            this.startSegment();
-            return;
+            this.spaceKey();
         }
     
         var key = String.fromCharCode(evt.keyCode);
+        if(evt.keyCode == 186) { //semi colon
+            key = ';';
+        }
         console.log("KEY DOWN: ", key);
         
-        if(this.listeningForSegment || this.practice) {
+        if(this.keysOn) {
             
-            if( dojo.some(this.key_list, function(item) { return item.keyName == key; }) ) {
+            if( key in this.game.keys ) {
             
-                console.log(this.key_to_sound[key], key);
-                this.playSound(this.key_to_sound[key]);
-            
+                console.log(this.game.keys[key], key);
+                this.playSound(this.game.keys[key]);
+                this.colorKey(key);
+                
+                if(this.listeningForSegment) { 
+                    this.processSegment(key);
+                }
             }
             
         }
         
-        //console.log(dojo.indexOf(this.key_list, key));
-        if( dojo.some(this.key_list, function(item) { return item.keyName == key; }) ) {
-            this.processSegment(key);
-            this.colorKey(key);
-        }
     },
 
     handleKeyUp: function(evt) {
         var key = String.fromCharCode(evt.keyCode);
-        console.log("KEY UP: ", key);
+//        console.log("KEY UP: ", key);
+        if(evt.keyCode == 186) { //semi colon
+            key = ';';
+        }
         
-        if( dojo.some(this.key_list, function(item) { return item.keyName == key; }) ) {
+        
+        if( key in this.game.keys ) {
             this.uncolorKey(key);
         }
     },
+    
+    spaceKey: function() {
+        console.log("Space key fired!");
+    },
 
+    //returns the JSonicDeferred
     sayText: function(text) {
 
         if(this.soundEnabled) {    
-            this.audio.say({'text':text});   
+            this.audio.stop();
+            return this.audio.say({'text':text});   
         } else {
             this.sayTextQueue.push(text);
         }
@@ -302,18 +281,18 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
             //.then(dojo.hitch(this, function() { this.playDeferredSounds }));
         }
         else if(this.sayTextQueue.length > 0) {
-            this.audio.say({'text':this.sayTextQueue.pop() });
+            return this.audio.say({'text':this.sayTextQueue.pop() });
         }
         
     },
 
     playSound: function(audioURL) {
         console.log("play sound?");
+        
         if(this.soundEnabled) {
             this.audio.stop();
-            this.audio.play({url : audioURL});
+            return this.audio.play({url : audioURL});
         }
-
     },
     
     colorKey: function(id) {

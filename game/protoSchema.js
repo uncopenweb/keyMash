@@ -3,16 +3,24 @@
     "name": "test game",
     
     "keys": {
-        'A' : '../sounds/A2',
-        'S' : '../sounds/B2',
-        'D' : '../sounds/C3',
-        'F' : '../sounds/D3'
+        'A' : '../sounds/daftsounds/workit',
+        'S' : '../sounds/daftsounds/doit',
+        'D' : '../sounds/daftsounds/makeit',
+        'F' : '../sounds/daftsounds/makesus',
+        
+        'J' : '../sounds/daftsounds/stronger',
+        'K' : '../sounds/daftsounds/faster',
+        'L' : '../sounds/daftsounds/better',
+        ';' : '../sounds/daftsounds/harder'
     },
     
     //array of segments
     "segments": [
-        {type:'keyBlock', segment:['A', 'S', 'D', 'F']},
-        {type:'audioBlock', url:'../sounds/synbass'},
-        {type:'keyBlock', segment:['S', 'D', 'F', 'A']}
+        {type:'audioBlock', url:'../sounds/daftsounds/intro'},
+        {type:'keyBlock', segment:['A', 'D', 'S', 'F'], pause:730},
+        {type:'audioBlock', url:'../sounds/daftsounds/vamp1', pause:0},
+        {type:'keyBlock', segment:[';', 'L', 'K', 'J'], pause:730},
+        {type:'audioBlock', url:'../sounds/daftsounds/vamp1', pause:0},
+        {type:'keyBlock', segment:['A', 'D', 'S', 'F', ';', 'L', 'K', 'J'], pause:300}
     ]
 }
