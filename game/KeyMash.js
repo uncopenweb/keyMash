@@ -2,6 +2,7 @@ dojo.provide('game.KeyMash');
 
 dojo.require('dijit._Widget');
 dojo.require('dijit._Templated');
+dojo.require('game.ProfileEditor');
 
 dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
     templatePath: dojo.moduleUrl('game', 'KeyMash.html'),
@@ -64,17 +65,20 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
     
     setupKeys: function() {
         
-        for(key in this.game.keys) {
-            
-            var keyblock = dojo.create('span', {
-                id:key, 
-                innerHTML:key
-            });
-            dojo.addClass(keyblock, 'keyblock');
-            
-            dojo.place(keyblock, this.at_keys);
-            
-        }
+        this.profile = new game.ProfileEditor();
+        dojo.place(this.profile.domNode, this.at_keys);
+        
+//        for(key in this.game.keys) {
+//            
+//            var keyblock = dojo.create('span', {
+//                id:key, 
+//                innerHTML:key
+//            });
+//            dojo.addClass(keyblock, 'keyblock');
+//            
+//            dojo.place(keyblock, this.at_keys);
+//            
+//        }
         
     },
     
@@ -89,7 +93,31 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
         
         //listen once
         var handle = dojo.connect(this, 'spaceKey', this, function() {
-            this.nextSegment();
+            //first segment stuff
+            this.keysOn = false;
+            
+            this.sayText("Start listening when you hear this sound,").callAfter(
+                dojo.hitch(this, function() {
+                    this.playSound("../sounds/ding1").callAfter(
+                        dojo.hitch(this, function() {
+                            this.sayText("And then start repeating the segment when you hear this sound,").callAfter(
+                                dojo.hitch(this, function() {
+                                    this.playSound("../sounds/ding2").callAfter(
+                                        dojo.hitch(this, function() {
+                                            this.sayText("Now you are all set to go! Enjoy the game!");
+                                        })
+                                    );
+                                    setTimeout(dojo.hitch(this, function() {
+                                        this.nextSegment();
+                                    }), 5000);
+                                })
+                            );
+                        })
+                    );
+                })
+            );
+        
+            //this.nextSegment();
             dojo.disconnect(handle);
         });
     },
@@ -101,7 +129,7 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
         
         if(this.currentSegment.type == "keyBlock") {
             this.at_messages.innerHTML = "Listen to the sequence of sounds, then try to repeat them!";
-            this.sayText("Listen to the sequence of sounds, then try to repeat them.").callAfter(
+            this.playSound("../sounds/ding1").callAfter(
                 dojo.hitch(this, function() {
                 
                     this.keysOn = false;
@@ -134,7 +162,7 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
         this.keysOn = true;
         
         this.at_messages.innerHTML = "Try to replicate the segment!";
-        this.sayText("Try to replicate the segment by pressing the keys to make sounds!");
+        this.playSound("../sounds/ding2");
     },
     
     playSegment: function() {
@@ -296,11 +324,13 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
     },
     
     colorKey: function(id) {
-        dojo.addClass(id, 'pressed');
+        //dojo.addClass(id, 'pressed');
+        this.profile.selectKey(id);
     },
     
     uncolorKey: function(id) {
-        dojo.removeClass(id, 'pressed');
+        //dojo.removeClass(id, 'pressed');
+        this.profile.selectKey(id);
     }
 
 

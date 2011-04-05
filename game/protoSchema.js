@@ -11,16 +11,49 @@
         'J' : '../sounds/daftsounds/stronger',
         'K' : '../sounds/daftsounds/faster',
         'L' : '../sounds/daftsounds/better',
-        ';' : '../sounds/daftsounds/harder'
+        ';' : '../sounds/daftsounds/harder',
+        
+        'Q' : '../sounds/daftsounds/morethan',
+        'W' : '../sounds/daftsounds/our',
+        'E' : '../sounds/daftsounds/hour',
+        'R' : '../sounds/daftsounds/never',
+        
+        'U' : '../sounds/daftsounds/over',
+        'I' : '../sounds/daftsounds/ever',
+        'O' : '../sounds/daftsounds/after',
+        'P' : '../sounds/daftsounds/workis'
     },
     
     //array of segments
     "segments": [
         {type:'audioBlock', url:'../sounds/daftsounds/intro'},
-        {type:'keyBlock', segment:['A', 'D', 'S', 'F'], pause:730},
+        
+        {type:'keyBlock', segment:['A', 'D', 'S', 'F'], pause:730}, //workit
+        {type:'audioBlock', url:'../sounds/daftsounds/vamp1', pause:0}, 
+        
+        {type:'keyBlock', segment:[';', 'L', 'K', 'J'], pause:730}, //harder
         {type:'audioBlock', url:'../sounds/daftsounds/vamp1', pause:0},
-        {type:'keyBlock', segment:[';', 'L', 'K', 'J'], pause:730},
+        
+        {type:'keyBlock', segment:['Q', 'E', 'W', 'R'], pause:730}, //morethan
         {type:'audioBlock', url:'../sounds/daftsounds/vamp1', pause:0},
-        {type:'keyBlock', segment:['A', 'D', 'S', 'F', ';', 'L', 'K', 'J'], pause:300}
+        
+        {type:'keyBlock', segment:['I', 'O', 'P', 'U'], pause:730}, //ever
+        {type:'audioBlock', url:'../sounds/daftsounds/vamp1', pause:0},
+        
+        {type:'keyBlock', segment:['A', 'D', 'S', 'F'], pause:730}, //workit
+        {type:'audioBlock', url:'../sounds/daftsounds/vamp1', pause:0}, 
+        
+        {type:'keyBlock', segment:[';', 'L', 'K', 'J'], pause:730}, //harder
+        {type:'audioBlock', url:'../sounds/daftsounds/vamp2', pause:0}, 
+        
+        //faster part
+        {type:'keyBlock', segment:['A', ';', 'D', 'L', 'S', 'K', 'F', 'J'], pause:250},
+        {type:'audioBlock', url:'../sounds/daftsounds/vamp1', pause:0}, 
+        
+        {type:'keyBlock', segment:['Q', 'I', 'E', 'O', 'W', 'P', 'R', 'U'], pause:250},
+        {type:'audioBlock', url:'../sounds/daftsounds/vamp1', pause:0}, 
+        
+        {type:'keyBlock', segment:['A', ';', 'D', 'L', 'S', 'K', 'F', 'J', 'Q', 'I', 'E', 'O', 'W', 'P', 'R', 'U'], pause:250},
+        {type:'audioBlock', url:'../sounds/daftsounds/vamp1', pause:0}, 
     ]
 }
