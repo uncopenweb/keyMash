@@ -65,7 +65,7 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
     
     setupKeys: function() {
         
-        this.profile = new game.ProfileEditor();
+        this.profile = new game.ProfileEditor({'keysUsed':this.game.keys});
         dojo.place(this.profile.domNode, this.at_keys);
         
 //        for(key in this.game.keys) {

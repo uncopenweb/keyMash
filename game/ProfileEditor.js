@@ -8,6 +8,7 @@ dojo.declare('game.ProfileEditor', [ dijit._Widget, dijit._Templated ], {
     widgetsInTemplate: true,
     
     profile: {},
+	keysUsed: [],
     
     gridLayout: [{ name: 'Profile Name', field: 'name', width: "50%" },
                     { name: 'Id', field: '_id', width: "50%" } ],
@@ -15,7 +16,8 @@ dojo.declare('game.ProfileEditor', [ dijit._Widget, dijit._Templated ], {
 
     postCreate: function() {
         this.inherited(arguments);
-        
+		
+		console.log("keys used", this.keysUsed);
         //this.initGrid();
         this.init();  
         
@@ -51,6 +53,9 @@ dojo.declare('game.ProfileEditor', [ dijit._Widget, dijit._Templated ], {
             dojo.hitch(this, function(key) {
                 var keyNode = dojo.create('span', {innerHTML:key, id:key});
                 dojo.addClass(keyNode, 'keyblock');
+				if(this.keysUsed[key] == null) {
+					dojo.addClass(keyNode, 'not_available');
+				}
                 dojo.place(keyNode, this.keys_available);
 //                dojo.connect(keyNode, 'onclick', this, dojo.hitch(this, function() {
 //                    this.selectKey(key);
@@ -71,7 +76,11 @@ dojo.declare('game.ProfileEditor', [ dijit._Widget, dijit._Templated ], {
             dojo.hitch(this, function(key) {
                 var keyNode = dojo.create('span', {innerHTML:key, id:key});
                 dojo.addClass(keyNode, 'keyblock');
+				if(this.keysUsed[key] == null) {
+					dojo.addClass(keyNode, 'not_available');
+				}
                 dojo.place(keyNode, this.keys_available);
+				
 //                dojo.connect(keyNode, 'onclick', this, dojo.hitch(this, function() {
 //                    this.selectKey(key);
 //                }));
@@ -91,7 +100,12 @@ dojo.declare('game.ProfileEditor', [ dijit._Widget, dijit._Templated ], {
             dojo.hitch(this, function(key) {
                 var keyNode = dojo.create('span', {innerHTML:key, id:key});
                 dojo.addClass(keyNode, 'keyblock');
+				if(this.keysUsed[key] == null) {
+					dojo.addClass(keyNode, 'not_available');
+				}
+				
                 dojo.place(keyNode, this.keys_available);
+				
 //                dojo.connect(keyNode, 'onclick', this, dojo.hitch(this, function() {
 //                    this.selectKey(key);
 //                }));
