@@ -17,7 +17,8 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
     keyUpHandle: {},
     
     game: {},
-
+	
+	numErrors: 0,
     segNum: 0,
     segIndex: 0,
     currentSegment: null,
@@ -31,7 +32,7 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
         
         //get test game data
         var def = dojo.xhrGet({
-            url:"protoSchema.js",
+            url:"protoSchema.json",
             handleAs:"json",
             load: dojo.hitch(this, function(data) {
                 this.game = data;
@@ -234,6 +235,23 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
                 
             } else {
                 
+				this.numErrors++;
+				
+				if(numErrors < 3) {
+					//wait a few seconds, then tell them to keep trying!
+					
+					this.waitSay("Try to find the next key!", 3000);
+					
+				} else if(numErrors < 5) {
+					//play the note for them
+					
+					this.waitSay("This is what the next key sounds like, try to find it!", 3000);
+					this.waitPlay(this.keys[this.segIndex], 4000);
+					
+				} else {
+					//start the segment over again
+				}
+				
                 this.playSound("../sounds/error");
                 console.log("WRONG KEY!");
                 
@@ -279,10 +297,13 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
             key = ';';
         }
         
-        
-        if( key in this.game.keys ) {
-            this.uncolorKey(key);
-        }
+        if (this.keysOn) {
+			
+			if (key in this.game.keys) {
+				this.uncolorKey(key);
+			}
+			
+		}
     },
     
     spaceKey: function() {
@@ -300,6 +321,49 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
         }
 
     },
+	
+	//Wait say delays for 'wait' miliseconds, then says the specified text UNLESS there is an interruption
+	waitSay: function(text, wait) {
+		
+		if(this.soundEnabled) {
+			
+			this.waitSay_waiting = true;
+			
+			var handle = dojo.subscribe('/uow/key/down/initial', dojo.hitch(this, function() {
+				this.waitSay_waiting = false;
+			}));
+			
+			setTimeout(dojo.hitch(this, function() {
+				if(this.waitSay_waiting) {
+					this.sayText(text);
+				}
+				dojo.unsubscribe(handle);
+			}), wait);
+			
+		}
+		
+	},
+	
+	//Wait play delays for 'wait' milis, then plays the specified sound UNLESS there is an interruption 
+	waitPlay: function(soundURL, wait) {
+		
+		if(this.soundEnabled) {
+			
+			this.waitPlay_waiting = true;
+			
+			var handle = dojo.subscribe('/uow/key/down/initial', dojo.hitch(this, function() {
+				this.waitPlay_waiting = false;
+			}));
+			
+			setTimeout(dojo.hitch(this, function() {
+				if(this.waitPlay_waiting) {
+					this.sayText(text);
+				}
+				dojo.unsubscribe(handle);
+			}), wait);
+			
+		}
+	},
     
     playDeferredSounds: function() {
         

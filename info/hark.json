@@ -1,0 +1,22 @@
+{
+    "identifier" : "url",
+    "items" : [
+        {
+            "url" : "keyMash/game/index.html",
+            "label" : {
+                "en-us" : "KeyMash"
+            },
+            "description" : {
+                "en-us" : "Play KeyMash, the keyboard audio game"
+            },
+            "tags" : {
+                "en-us" : "keyboard, audio, sound"
+            },
+            "media" : {
+                "icon" : "",
+                "screenshots" : [""]
+            },
+            "attribution" : ""
+        }
+    ]
+}
