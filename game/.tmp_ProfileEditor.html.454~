@@ -1,0 +1,4 @@
+<div class="ProfileEditor">
+    <h2>Keys Available</h2>
+    <div dojoAttachPoint="keys_available" class="key_box"></div>
+</div>

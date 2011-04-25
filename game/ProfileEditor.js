@@ -122,15 +122,20 @@ dojo.declare('game.ProfileEditor', [ dijit._Widget, dijit._Templated ], {
     },
     
     selectKey: function(key) {
-        console.log(key);
-        if(dojo.hasClass(dojo.byId(key), 'pressed')) {
-            dojo.removeClass(dojo.byId(key), 'pressed');
-            //dojo.addClass(dojo.byId(key+'_toAdd'), 'invis');
-        } else {
-            dojo.addClass(dojo.byId(key), 'pressed');
-            //dojo.removeClass(dojo.byId(key+'_toAdd'), 'invis');
-        }
+//        console.log(key);
+		dojo.addClass(dojo.byId(key), 'pressed');
+//        if(dojo.hasClass(dojo.byId(key), 'pressed')) {
+//            dojo.removeClass(dojo.byId(key), 'pressed');
+//            //dojo.addClass(dojo.byId(key+'_toAdd'), 'invis');
+//        } else {
+//            dojo.addClass(dojo.byId(key), 'pressed');
+//            //dojo.removeClass(dojo.byId(key+'_toAdd'), 'invis');
+//        }
         
-    }
+    },
+	
+	unselectKey: function(key) {
+		dojo.removeClass(dojo.byId(key), 'pressed');
+	}
 
 });

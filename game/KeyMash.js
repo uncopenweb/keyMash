@@ -59,6 +59,14 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
             this.setupKeys();
             
             this.startGame();
+			
+			
+			//setup waitsay handling - this will ideally go into the sound class later
+			dojo.connect(this, 'handleKeyDown', this, function() {
+//				this.clearWaitSay();
+				this.killWait();
+			});
+			
             console.log("all done");
         }))));
     
@@ -126,8 +134,17 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
     nextSegment: function() {
     
         console.log("next segment");
+		this.clearKeys();
+		
+		if(this.segNum >= this.game.segments.length) {
+			
+			this.sayText("Congrats, you have finished this song!");
+			
+			return;
+		}
+		
         this.currentSegment = this.game.segments[this.segNum];
-        
+		
         if(this.currentSegment.type == "keyBlock") {
             this.at_messages.innerHTML = "Listen to the sequence of sounds, then try to repeat them!";
             this.playSound("../sounds/ding1").callAfter(
@@ -154,16 +171,6 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
         
         this.segNum++;
     
-    },
-    
-    listenSegment: function() {
-        console.log("listen segment");
-        this.segIndex = 0;
-        this.listeningForSegment = true;
-        this.keysOn = true;
-        
-        this.at_messages.innerHTML = "Try to replicate the segment!";
-        this.playSound("../sounds/ding2");
     },
     
     playSegment: function() {
@@ -204,59 +211,94 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
                 console.log("play next sound");
                 dojo.when(d, playNextSound);
             } else {
-                //listening(true);
                 dojo.when(d, dojo.hitch(this, function() { 
                     this.listenSegment(); 
                 }));
             }
         });
 
+		this.clearKeys();
         console.log("PLAY SEGMENT!");
         playNextSound({time:this.currentSegment.pause, 'list':this.currentSegment.segment, index:0});
     
         
     },
+	
+	//does setup for begining the next segment
+    listenSegment: function() {
+        console.log("listen segment");
+        this.segIndex = 0;
+        this.listeningForSegment = true;
+        this.keysOn = true;
+		
+		//incase any of the keys have entered a weird state, set them all back to unpressed
+		this.clearKeys();
+        
+        this.at_messages.innerHTML = "Try to replicate the segment!";
+        this.playSound("../sounds/ding2");
+    },
     
     processSegment: function(key) {
-    
+	
         if(this.listeningForSegment) {
         
             console.log(key, " processed!");
             if(key == this.currentSegment.segment[this.segIndex]) {
                 console.log("CORRECT!");
                 this.segIndex += 1;
+				this.numErrors = 0;
+				this.killWait();
                 
                 if(this.segIndex == this.currentSegment.segment.length) {
                     console.log("Segment completed!!!!!!");
-                    //setTimeout(dojo.hitch(this, function() { this.playSound("../sounds/win"); }), 500);
-                    //setTimeout(dojo.hitch(this, function() { this.sayText("Press the space bar to hear the next section"); }), 1000);
+					this.keysOn = false;
+					
                     setTimeout(dojo.hitch(this, function() { this.nextSegment(); }), 1000);
                 }
                 
             } else {
-                
-				this.numErrors++;
+//                this.clearWaitSay();
+				this.killWait();
 				
-				if(numErrors < 3) {
+                this.playSound("../sounds/error");
+                console.log("WRONG KEY!"); 
+				
+				this.numErrors++;
+				console.log("Num errors: " + this.numErrors);
+				
+				if(this.numErrors <= 2) {
 					//wait a few seconds, then tell them to keep trying!
+
+					this.wait(3000).then(dojo.hitch(this, function() {
+						this.sayText("Try to find the next key!");
+					}));
 					
-					this.waitSay("Try to find the next key!", 3000);
-					
-				} else if(numErrors < 5) {
+				} else if(this.numErrors <= 4) {
 					//play the note for them
+//					this.waitSay("This is what the next key sounds like, try to find it!", 3000);
 					
-					this.waitSay("This is what the next key sounds like, try to find it!", 3000);
-					this.waitPlay(this.keys[this.segIndex], 4000);
+					this.wait(3000).then(dojo.hitch(this, function() {
+						this.sayText("This is what the next key sounds like, try to find it!").callAfter(dojo.hitch(this, function() {
+							this.playSound(this.game.keys[ this.currentSegment.segment[this.segIndex] ]);
+						}));
+					}));
+					
+					//this.waitPlay(this.keys[this.segIndex], 5000);
 					
 				} else {
 					//start the segment over again
+					
+					this.keyOn = false;
+					this.wait(3000).then(dojo.hitch(this, function() {
+							this.sayText("Try listening to the sounds again").callAfter(dojo.hitch(this, function() {
+		                	//restart segment
+		                	this.segIndex = 0;
+							this.numErrors = 0;
+							this.playSegment(); 
+						}));
+					}));
 				}
 				
-                this.playSound("../sounds/error");
-                console.log("WRONG KEY!");
-                
-                //restart segment
-                this.segIndex = 0;   
             }
         }
     },
@@ -296,13 +338,9 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
         if(evt.keyCode == 186) { //semi colon
             key = ';';
         }
-        
-        if (this.keysOn) {
-			
-			if (key in this.game.keys) {
-				this.uncolorKey(key);
-			}
-			
+		
+		if (key in this.game.keys) {
+			this.uncolorKey(key);
 		}
     },
     
@@ -322,23 +360,74 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
 
     },
 	
+	//simply wait for 'time' milliseconds, return deferred
+	wait: function(time) {
+		
+		var d = new dojo.Deferred();
+		
+		this.waitHandle = setTimeout(function(){
+			d.callback();
+		}, time);
+		
+		return d;
+		
+	},
+	
+	killWait: function(deferred) {
+		
+		if(deferred != null) {
+			deferred.cancel();
+		}
+		
+		if(this.waitHandle != null) {
+			clearTimeout(this.waitHandle);
+		}
+		
+	},
+	
+	clearWaitSay: function() {
+		
+		if(this.lastWaitSayHandle != null) {
+			clearTimeout(this.lastWaitSayHandle);
+		}		
+	},
+	
 	//Wait say delays for 'wait' miliseconds, then says the specified text UNLESS there is an interruption
 	waitSay: function(text, wait) {
 		
 		if(this.soundEnabled) {
 			
-			this.waitSay_waiting = true;
+			this.clearWaitSay();
 			
-			var handle = dojo.subscribe('/uow/key/down/initial', dojo.hitch(this, function() {
-				this.waitSay_waiting = false;
-			}));
+			var d = new dojo.Deferred();
 			
-			setTimeout(dojo.hitch(this, function() {
-				if(this.waitSay_waiting) {
-					this.sayText(text);
-				}
-				dojo.unsubscribe(handle);
-			}), wait);
+			var say = dojo.hitch(this, function() {
+				
+				this.sayText(text);
+				d.callback();
+				
+			});
+			
+			dojo.partial(say, text);
+			this.lastWaitSayHandle = setTimeout(say, wait);
+			
+			return d;
+			
+			
+//			function inner(text) {
+//			
+//				var handle = dojo.connect(null, 'onkeydown', function() {
+//					console.log("timeout cleared");
+//					clearTimeout(timeout);
+//				});
+//				
+//				dojo.hitch(this, func(text));
+//			}
+//			
+//			function func(text) {
+//					this.sayText(text);
+//					dojo.disconnect(handle);
+//			}
 			
 		}
 		
@@ -394,8 +483,14 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
     
     uncolorKey: function(id) {
         //dojo.removeClass(id, 'pressed');
-        this.profile.selectKey(id);
-    }
+        this.profile.unselectKey(id);
+    },
+	
+	clearKeys: function() {
+		for(key in this.game.keys) {
+			this.uncolorKey(key);
+		}
+	}
 
 
 });

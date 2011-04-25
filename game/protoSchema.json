@@ -47,13 +47,13 @@
         {type:'audioBlock', url:'../sounds/daftsounds/vamp2', pause:0}, 
         
         //faster part
-        {type:'keyBlock', segment:['A', ';', 'D', 'L', 'S', 'K', 'F', 'J'], pause:250},
+        {type:'keyBlock', segment:['A', ';', 'D', 'L', 'S', 'K', 'F', 'J'], pause:0},
         {type:'audioBlock', url:'../sounds/daftsounds/vamp1', pause:0}, 
         
-        {type:'keyBlock', segment:['Q', 'I', 'E', 'O', 'W', 'P', 'R', 'U'], pause:250},
+        {type:'keyBlock', segment:['Q', 'I', 'E', 'O', 'W', 'P', 'R', 'U'], pause:0},
         {type:'audioBlock', url:'../sounds/daftsounds/vamp1', pause:0}, 
         
-        {type:'keyBlock', segment:['A', ';', 'D', 'L', 'S', 'K', 'F', 'J', 'Q', 'I', 'E', 'O', 'W', 'P', 'R', 'U'], pause:250},
+        {type:'keyBlock', segment:['A', ';', 'D', 'L', 'S', 'K', 'F', 'J', 'Q', 'I', 'E', 'O', 'W', 'P', 'R', 'U'], pause:0},
         {type:'audioBlock', url:'../sounds/daftsounds/vamp1', pause:0}, 
     ]
 }
