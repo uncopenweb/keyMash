@@ -25,7 +25,7 @@
 		
 		{type:'keyBlock', segment:['F', 'D', 'S', 'S', 'F'], pause:0},
 		
-		{type:'keyBlock', segment:['K', 'K', 'K', ,'K', 'J'], pause:0},
+		{type:'keyBlock', segment:['K', 'K', 'K', 'J'], pause:0},
 		
 		{type:'keyBlock', segment:['F', 'J', 'K', 'F', 'D', 'S', 'S'], pause:0},
 		
