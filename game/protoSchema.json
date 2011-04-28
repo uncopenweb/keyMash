@@ -55,5 +55,6 @@
         
         {type:'keyBlock', segment:['A', ';', 'D', 'L', 'S', 'K', 'F', 'J', 'Q', 'I', 'E', 'O', 'W', 'P', 'R', 'U'], pause:0},
         {type:'audioBlock', url:'../sounds/daftsounds/end', pause:0}, 
+		{type:'audioBlock', url:'../sounds/win', pause:0}
     ]
 }
