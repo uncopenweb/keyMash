@@ -1,0 +1,35 @@
+{
+    //games name
+    "name": "Simple Game",
+    
+    "keys": {
+
+        'S' : '../sounds/simplesounds/G3',
+        'D' : '../sounds/simplesounds/A3',
+        'F' : '../sounds/simplesounds/B3',
+        
+        'J' : '../sounds/simplesounds/C4',
+        'K' : '../sounds/simplesounds/D4',
+        'L' : '../sounds/simplesounds/E4',
+    
+    },
+    
+    //array of segments
+    "segments": [
+        
+        {type:'keyBlock', segment:['S', 'F', 'J', 'K'], pause:0},
+		
+		{type:'keyBlock', segment:['S', 'F', 'J', 'K'], pause:0},
+		
+		{type:'keyBlock', segment:['S', 'F', 'J', 'K', 'F', 'S', 'F', 'D'], pause:0},
+		
+		{type:'keyBlock', segment:['F', 'D', 'S', 'S', 'F'], pause:0},
+		
+		{type:'keyBlock', segment:['K', 'K', 'K', ,'K', 'J'], pause:0},
+		
+		{type:'keyBlock', segment:['F', 'J', 'K', 'F', 'D', 'S', 'S'], pause:0},
+		
+		{type:'audioBlock', url:'../sounds/win', pause:0}
+		
+    ]
+}

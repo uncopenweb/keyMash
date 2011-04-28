@@ -9,7 +9,8 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
     widgetsInTemplate: true,
     
     sayTextQueue: [], //queue used for keeping text to say until the audio instance arrives
-    
+    schemaLocations: "",
+	
     audio: {},
     soundEnabled: false,
     
@@ -32,7 +33,7 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
         
         //get test game data
         var def = dojo.xhrGet({
-            url:"protoSchema.json",
+            url:this.schemaLocation,
             handleAs:"json",
             load: dojo.hitch(this, function(data) {
                 this.game = data;
@@ -94,11 +95,22 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
     startGame: function() {
 
         //you can now start messing with the keys
-        this.keysOn = true;
+        this.keysOn = false;
         
         //display the standard start messages
         this.at_messages.innerHTML = "Practice by pressing the keys to hear the sounds they make. <br> Press the space bar to continue...";
-        this.sayText("Practice by pressing the keys to hear the sounds they make, then press the space bar when you are ready to continue");
+		
+		var saythis = " These are the keys this game uses, ";
+		for(key in this.game.keys) {
+			saythis = saythis + (" " + key + ", . , ");
+		}
+		
+		this.sayText("Welcome to Key Mash! The game where you listen to the song, then play back the sounds you hear, " + saythis).callAfter(
+			dojo.hitch(this, function() {
+				this.sayText("Practice by pressing the keys to hear the sounds they make, then press the space bar when you are ready to continue");
+				this.keysOn = true;
+			})
+		);
         
         //listen once
         var handle = dojo.connect(this, 'spaceKey', this, function() {
@@ -109,15 +121,18 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
                 dojo.hitch(this, function() {
                     this.playSound("../sounds/ding1").callAfter(
                         dojo.hitch(this, function() {
-                            this.sayText("And then start repeating the segment when you hear this sound,").callAfter(
+                            this.sayText("And then start repeating the sounds when you hear this sound,").callAfter(
                                 dojo.hitch(this, function() {
                                     this.playSound("../sounds/ding2").callAfter(
                                         dojo.hitch(this, function() {
                                             this.sayText("Now you are all set to go! Enjoy the game!");
                                         })
                                     );
+									
+            						dojo.disconnect(handle);
                                     setTimeout(dojo.hitch(this, function() {
                                         this.nextSegment();
+										
                                     }), 5000);
                                 })
                             );
@@ -127,7 +142,7 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
             );
         
             //this.nextSegment();
-            dojo.disconnect(handle);
+			//dojo.disconnect(handle);
         });
     },
     
@@ -472,7 +487,7 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
         
         if(this.soundEnabled) {
             this.audio.stop();
-            return this.audio.play({url : audioURL});
+            return this.audio.play({url : audioURL, cache:true});
         }
     },
     
