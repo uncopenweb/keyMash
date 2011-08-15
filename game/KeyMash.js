@@ -14,10 +14,6 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
     audio: {},
     soundEnabled: false,
 	
-	//masterVolume: 1.0,
-	//speechVolume: 1.0,
-	//soundVolume: 1.0,
-    
     keyDownHandle: {},
     keyUpHandle: {},
     
@@ -328,9 +324,6 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
 		this.audio.setProperty({name : 'volume', value : prefs.volume*prefs.speechVolume, immediate : true});
 		this.audio.setProperty({name : 'volume', channel : 'sounds', value : prefs.volume*prefs.soundVolume, immediate : true});
 		this.audio.setProperty({name : 'rate', value : prefs.speechRate, immediate : true});
-		//this.masterVolume=prefs.volume;
-		//this.speechVolume=prefs.speechVolume;
-		//this.soundVolume=prefs.soundVolume;
 	},
 	
     handleKeyDown: function(evt) {
@@ -383,7 +376,6 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
 		console.log("say");
         if(this.soundEnabled) {    
             this.audio.stop();
-			//this.audio.setProperty({name : 'volume', value : this.masterVolume*this.speechVolume});
             return this.audio.say({'text':text});   
         } else {
             this.sayTextQueue.push(text);
@@ -493,7 +485,7 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
             //.then(dojo.hitch(this, function() { this.playDeferredSounds }));
         }
         else if(this.sayTextQueue.length > 0) {
-            return this.audio.say({'text':this.sayTextQueue.pop(), });
+            return this.audio.say({'text':this.sayTextQueue.pop() });
         }
         
     },
@@ -503,7 +495,6 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
         
         if(this.soundEnabled) {
             this.audio.stop({channel : 'sounds'});
-			//this.audio.setProperty({name : 'volume', channel : 'sounds', value : this.masterVolume*this.soundVolume});
             return this.audio.play({url : audioURL, channel : 'sounds', cache : true});
         }
     },
