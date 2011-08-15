@@ -365,7 +365,7 @@ dojo.declare('game.KeyMash', [ dijit._Widget, dijit._Templated ], {
 
     //returns the JSonicDeferred
     sayText: function(text) {
-		console.log("say");
+		
         if(this.soundEnabled) {    
             this.audio.stop();
             return this.audio.say({'text':text});   
